@@ -5,7 +5,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using COM3D2.i18nEx.Core.TranslationManagers;
 using HarmonyLib;
+using Honeymoon;
 using I2.Loc;
+using Kasizuki;
 using MaidStatus;
 using UnityEngine;
 using UnityEngine.UI;
@@ -300,5 +302,99 @@ namespace COM3D2.i18nEx.Core.Hooks
         }
 
         private delegate void TranslateInfo(ref string text);
+
+
+        // Trophy Small thumbnails fix
+        [HarmonyPatch(typeof(TrophyInfo), nameof(TrophyInfo.SetData))]
+        [HarmonyPostfix]
+        private static void SupportSubtitle(Trophy.Data trophy_data, ref TrophyInfo __instance)
+        {
+            //Just reuse the JP texture, it's so small that noone is able to ready anything on it anyway.
+            if (!string.IsNullOrEmpty(trophy_data.miniCardTextureFileName))
+            {
+                string texturFileName = trophy_data.miniCardTextureFileName;
+                Sprite sprite2D = wf.Utility.CreateTextureSprite(texturFileName);
+                __instance.card_sprite_.sprite2D = sprite2D;
+            }
+        }
+
+        // Trophy Big pictures fix
+        [HarmonyPatch(typeof(SceneTrophyCardFade), nameof(SceneTrophyCardFade.CallCard))]
+        [HarmonyPrefix]
+        private static bool CallCardPreFix(Trophy.Data tropheyData, Vector3 cardWorldPos, ref SceneTrophyCardFade __instance)
+        {
+            if (__instance.cardSprite.sprite2D != null && __instance.cardSprite.sprite2D.texture != null)
+            {
+                UnityEngine.Object.DestroyImmediate(__instance.cardSprite.sprite2D.texture);
+            }
+            __instance.cardSprite.sprite2D = null;
+            if (!string.IsNullOrEmpty(tropheyData.cardTextureFileName))
+            {
+                string texturFileName = tropheyData.cardTextureFileName;
+
+                // This is the part that causes issues, tbh it's useless but as a precaution I leave it here and add a fallback after
+                if (Product.supportMultiLanguage)
+                {
+                    texturFileName = LocalizationManager.GetTranslation(tropheyData.cardTextureFileNameTerm, true, 0, true, false, null, Product.EnumConvert.ToI2LocalizeLanguageName(Product.systemLanguage));
+                }
+                // The fallback
+                if (String.IsNullOrEmpty(texturFileName))
+                {
+                    texturFileName = tropheyData.cardTextureFileName;
+                }
+
+                Sprite sprite = wf.Utility.CreateTextureSprite(texturFileName);
+                if (sprite != null)
+                {
+                    __instance.cardSprite.sprite2D = sprite;
+                    __instance.cardSprite.SetDimensions((int)sprite.rect.width, (int)sprite.rect.height);
+                }
+            }
+            __instance.cardSprite.transform.position = cardWorldPos;
+            __instance.uiCardPos = cardWorldPos;
+            WfFadeJob.Create(null, __instance, __instance.fadeTime, iTween.EaseType.easeInOutSine);
+
+            return false;
+        }
+
+
+        //Translation of the textures' names are handled in the get method, because..?
+        [HarmonyPatch(typeof(Honeymoon.HoneymoonDatabase.Localtion), nameof(HoneymoonDatabase.Localtion.iconFileNames), MethodType.Getter)]
+        [HarmonyPostfix]
+        public static void GetIconFileNames(ref string[] __result)
+        {
+            for (int i = 0; i < __result.Length; i++)
+            {
+                if (__result[i].EndsWith("_en.tex"))
+                {
+                    string jpIcon = __result[i].Replace("_en", "");
+                    __result[i] = jpIcon;
+                }
+            }
+        }
+
+        //Guest mode fix ?
+        [HarmonyPatch(typeof(AppealData.Data), nameof(AppealData.Data.GetTexture), new Type[] { typeof(Product.Language) })]
+        [HarmonyPostfix]
+        public static void GetTexturePrefix(ref Texture2D __result, ref AppealData.Data __instance)
+        {
+            //Just in case the _en texture is indeed here, let's check for it
+            if (__result == null)
+            {
+                // If it's not then use the JP texture instead as done in the GetTexture() overload
+
+                string filename = __instance.texName + ".tex";
+
+                if (GameUty.FileSystem.IsExistentFile(filename))
+                {
+                    __result = ImportCM.CreateTexture(filename);
+                }
+                else
+                {
+                    Debug.LogError($"{filename} couldn't be found!");
+                    __result = null;
+                }
+            }
+        }
     }
 }
