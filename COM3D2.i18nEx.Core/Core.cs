@@ -15,7 +15,7 @@ namespace COM3D2.i18nEx.Core
 {
     public class Core : MonoBehaviour
     {
-        private const int MIN_SUPPORTED_VERSION = 1320;
+        private const int MIN_SUPPORTED_VERSION = 23400;
         internal static ScriptTranslationManager ScriptTranslate;
         internal static TextureReplaceManager TextureReplace;
         internal static I2TranslationManager I2Translation;
