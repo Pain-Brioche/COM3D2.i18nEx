@@ -5,10 +5,10 @@ using System.Reflection;
 using System.Reflection.Emit;
 using COM3D2.i18nEx.Core.TranslationManagers;
 using HarmonyLib;
-using Honeymoon;
 using I2.Loc;
 using Kasizuki;
 using MaidStatus;
+using Teikokusou;
 using UnityEngine;
 using UnityEngine.UI;
 using wf;
@@ -358,8 +358,9 @@ namespace COM3D2.i18nEx.Core.Hooks
         }
 
 
+        //Honeymoon location texture fix
         //Translation of the textures' names are handled in the get method, because..?
-        [HarmonyPatch(typeof(Honeymoon.HoneymoonDatabase.Localtion), nameof(HoneymoonDatabase.Localtion.iconFileNames), MethodType.Getter)]
+        [HarmonyPatch(typeof(Honeymoon.HoneymoonDatabase.Localtion), nameof(Honeymoon.HoneymoonDatabase.Localtion.iconFileNames), MethodType.Getter)]
         [HarmonyPostfix]
         public static void GetIconFileNames(ref string[] __result)
         {
@@ -373,7 +374,28 @@ namespace COM3D2.i18nEx.Core.Hooks
             }
         }
 
-        //Guest mode fix ?
+        //Imperial Villa button fix
+        //Like the above, the use of the _en suffix breaks the texture
+        //And since it's in the middle of the daily scene UI creation, better use a transpiler this time.
+        [HarmonyPatch(typeof(DailyCtrl), nameof(DailyCtrl.DisplayViewer))]
+        [HarmonyTranspiler]
+        public static IEnumerable<CodeInstruction> SuppotMultilanguage_Edit(IEnumerable<CodeInstruction> instructions)
+        {
+            var checkpoint = new CodeMatcher(instructions)
+                                 .MatchForward(false,
+                                 new CodeMatch(OpCodes.Ldstr, "bunnre_teikokusou_sales")); //easy to match point
+
+            var result = checkpoint.Advance(3)
+                                   .Insert(
+                                        new CodeInstruction(OpCodes.Pop),
+                                        new CodeInstruction(OpCodes.Ldc_I4_0))
+                                   .InstructionEnumeration();
+
+            return result;
+        }
+
+
+        //Guest mode fix
         [HarmonyPatch(typeof(AppealData.Data), nameof(AppealData.Data.GetTexture), new Type[] { typeof(Product.Language) })]
         [HarmonyPostfix]
         public static void GetTexturePrefix(ref Texture2D __result, ref AppealData.Data __instance)
@@ -391,7 +413,7 @@ namespace COM3D2.i18nEx.Core.Hooks
                 }
                 else
                 {
-                    Debug.LogError($"{filename} couldn't be found!");
+                    Core.Logger.LogError($"{filename} couldn't be found!");
                     __result = null;
                 }
             }
