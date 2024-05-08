@@ -60,7 +60,11 @@ namespace TranslationExtract
                         continue;
 
                     var csvName = EscapeCSVItem(tl);
-                    sw.WriteLine($"{toString(item)},Text,,{csvName},{csvName}");
+                    if (!csvName.StartsWith("\""))
+                        csvName = $"\"{csvName}\"";
+
+
+                    sw.WriteLine($"\"{prefix}\",Text,,{csvName},");
                 }
             }
         }
@@ -553,6 +557,8 @@ namespace TranslationExtract
                             arg => new[] { $"{prefix}/{arg.uniqueName}" },
                             arg => new[] { arg.displayName },
                             opts.skipTranslatedItems);
+
+                
             }
 
             var encoding = new UTF8Encoding(true);

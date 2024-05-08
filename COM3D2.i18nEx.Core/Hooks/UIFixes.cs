@@ -379,7 +379,7 @@ namespace COM3D2.i18nEx.Core.Hooks
         //And since it's in the middle of the daily scene UI creation, better use a transpiler this time.
         [HarmonyPatch(typeof(DailyCtrl), nameof(DailyCtrl.DisplayViewer))]
         [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> SuppotMultilanguage_Edit(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<CodeInstruction> DisplayViewer_Edit(IEnumerable<CodeInstruction> instructions)
         {
             var checkpoint = new CodeMatcher(instructions)
                                  .MatchForward(false,
