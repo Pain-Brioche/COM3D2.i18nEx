@@ -538,7 +538,6 @@ namespace TranslationExtract
                 keyValuePair.Value.Dispose();
         }
 
-
         private void DumpPersonalityNames(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
@@ -609,28 +608,34 @@ namespace TranslationExtract
                 using var scenarioNei = new CsvParser();
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
                 scenarioNei.Open(f);
+                int commandCount = 0;
 
                 for (var i = 0; i < scenarioNei.max_cell_y; i++)
                 {
-                    if (!scenarioNei.IsCellToExistData(0, i))
+                    if (!scenarioNei.IsCellToExistData(2, i))
                     {
                         i += 2;
                         continue;
                     }
+                    commandCount++;
 
                     var commandName = scenarioNei.GetCellAsString(2, i);
 
                     if (opts.skipTranslatedItems &&
                         LocalizationManager.TryGetTranslation($"YotogiSkillCommand/{commandName}", out var _))
                         continue;
+                    
 
                     if (commandNames.Contains(commandName))
                         continue;
 
                     commandNames.Add(commandName);
 
+                    Logger.LogWarning($"\nNumber of commands found: {commandNames.Count}");
+                    Logger.LogWarning($"Number of commands registered: {commandNames.Count}");
+
                     var csvName = EscapeCSVItem(commandName);
-                    sw.WriteLine($"{csvName},Text,,{csvName},{csvName}");
+                    sw.WriteLine($"{csvName},Text,,{csvName},");
                 }
             }
         }
