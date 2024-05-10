@@ -608,7 +608,6 @@ namespace TranslationExtract
                 using var scenarioNei = new CsvParser();
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
                 scenarioNei.Open(f);
-                int commandCount = 0;
 
                 for (var i = 0; i < scenarioNei.max_cell_y; i++)
                 {
@@ -617,7 +616,6 @@ namespace TranslationExtract
                         i += 2;
                         continue;
                     }
-                    commandCount++;
 
                     var commandName = scenarioNei.GetCellAsString(2, i);
 
@@ -630,9 +628,6 @@ namespace TranslationExtract
                         continue;
 
                     commandNames.Add(commandName);
-
-                    Logger.LogWarning($"\nNumber of commands found: {commandNames.Count}");
-                    Logger.LogWarning($"Number of commands registered: {commandNames.Count}");
 
                     var csvName = EscapeCSVItem(commandName);
                     sw.WriteLine($"{csvName},Text,,{csvName},");
