@@ -485,12 +485,12 @@ namespace TranslationExtract
 
             Debug.Log("Getting schedule.");
 
-            void WriteSimpleData(string file, IList<(int, string)> columnNames, StreamWriter sw)
+            void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw)
             {
 				sw.WriteCSV(file, "Schedule",
                     (parser, i) =>
                     {
-                        var columnText = columnNames
+                        var columnText = columnIndexName
                                         .Select(column => parser.GetCellAsString(column.Item1, i))
                                         .ToList();
 
@@ -504,9 +504,9 @@ namespace TranslationExtract
                     },
                     arg =>
                     {
-                        var keys = new string[columnNames.Count()];
+                        var keys = new string[columnIndexName.Count()];
                         var index = 0;
-                        foreach (var columnTranslation in columnNames)
+                        foreach (var columnTranslation in columnIndexName)
                         {
                             keys[index++] = arg.id + "\\" + columnTranslation.Item2;
 					    }
