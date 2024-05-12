@@ -477,6 +477,7 @@ namespace TranslationExtract
             NpcNames.Clear();
             filesToSkip.Clear();
         }
+
         private void DumpSchedule(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
@@ -516,7 +517,7 @@ namespace TranslationExtract
 			}
 
             var encoding = new UTF8Encoding(true);
-            using (var sw = new StreamWriter(Path.Combine(unitPath, "Schedule.csv"), false, encoding))
+            using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding))
             {
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
                 WriteSimpleData("schedule_work_night.nei", new[]
@@ -736,30 +737,6 @@ namespace TranslationExtract
                         arg => new[] { arg.vipName, arg.vipDescription },
                         opts.skipTranslatedItems);
         }
-        /*
-        private void DumpScheduleWorkCategory(DumpOptions opts)
-        {
-            var i2Path = Path.Combine(TL_DIR, "UI");
-            var unitPath = Path.Combine(i2Path, "zzz_schedule_category");
-            Directory.CreateDirectory(unitPath);
-
-            Debug.Log("Getting Schedule categories");
-
-            var encoding = new UTF8Encoding(true);
-            using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding))
-            {
-                sw.WriteLine("Key,Type,Desc,Japanese,English");
-                sw.WriteCSV("schedule_work_night_category_list.nei", "SceneDaily",
-                            (parser, i) => new
-                            {
-                                skillName = parser.GetCellAsString(1, i)
-                            },
-                            arg => new[] { arg.skillName },
-                            arg => new[] { arg.skillName },
-                            opts.skipTranslatedItems);
-            }
-        }
-        */
 
         private string EscapeCSVItem(string str)
         {
