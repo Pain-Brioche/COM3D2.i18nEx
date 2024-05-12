@@ -35,9 +35,14 @@ namespace TranslationExtract
 
         public static bool ContainsJapaneseCharacters(this string input)
         {
-            var regex = new Regex(@"[\p{IsHiragana}\p{IsKatakana}\p{IsCJKUnifiedIdeographs}]");
+			// Define the ranges for Japanese characters
+            var japaneseRanges = @"[\p{IsHiragana}\p{IsKatakana}\p{IsCJKUnifiedIdeographs}]";
+
+            // Combine all ranges and exclude non-letter symbols and grammatical marks
+            var regex = new Regex(japaneseRanges);
+
             return regex.IsMatch(input);
-        }
+		}
 
 		public static void WriteCSV<T>(this StreamWriter sw,
                                        string neiFile,
@@ -62,8 +67,8 @@ namespace TranslationExtract
 
                 foreach (var (prefix, tl) in prefixes.ZipWith(translations))
                 {
-                    if (skipIfExists && (LocalizationManager.TryGetTranslation($"{csvFile}/{prefix}", out var _)) ||
-                        tl.ContainsJapaneseCharacters() == false)
+                    if (skipIfExists && ((LocalizationManager.TryGetTranslation($"{csvFile}/{prefix}", out var _)) ||
+                        tl.ContainsJapaneseCharacters() == false))
                         continue;
 
                     if (string.IsNullOrEmpty(tl))
@@ -73,7 +78,9 @@ namespace TranslationExtract
                     if (!csvName.StartsWith("\""))
                         csvName = $"\"{csvName}\"";
 
-                    sw.WriteLine($"\"{prefix}\",Text,,{csvName},");
+                    var cleanPrefix = prefix.Replace("×", "_");
+
+					sw.WriteLine($"\"{cleanPrefix}\",Text,,{csvName},");
                 }
             }
         }
@@ -488,11 +495,11 @@ namespace TranslationExtract
 
             void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw)
             {
-				sw.WriteCSV(file, "Schedule",
+				sw.WriteCSV(file, "SceneDaily",
                     (parser, i) =>
                     {
                         var columnText = columnIndexName
-                                        .Select(column => parser.GetCellAsString(column.Item1, i))
+                                        .Select(column => (column.Item2, parser.GetCellAsString(column.Item1, i)))
                                         .ToList();
 
                         var translationData = new
@@ -505,15 +512,16 @@ namespace TranslationExtract
                     },
                     arg =>
                     {
-                        var keys = new string[columnIndexName.Count()];
+                        var keys = new string[arg.columnText.Count()];
                         var index = 0;
-                        foreach (var columnTranslation in columnIndexName)
+                        foreach (var columnTranslation in arg.columnText)
                         {
-                            keys[index++] = arg.id + "\\" + columnTranslation.Item2;
+                            keys[index++] = columnTranslation.Item1 + columnTranslation.Item2;
 					    }
                         return keys;
                     },
-                    arg => arg.columnText);
+                    arg => arg.columnText.Select(r => r.Item2), 
+                    opts.skipTranslatedItems);
 			}
 
             var encoding = new UTF8Encoding(true);
@@ -522,32 +530,31 @@ namespace TranslationExtract
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
                 WriteSimpleData("schedule_work_night.nei", new[]
                 {
-                    (1, "イベント名"),
-                    //(2, "イベント内容"),
-                    (7, "説明"),
-                    (12, "条件説明文1"),
-                    (13, "条件説明文2"),
-                    (14, "条件説明文3"),
-                    (15, "条件説明文4"),
-                    (16, "条件説明文5"),
-                    (17, "条件説明文6"),
-                    (18, "条件説明文7"),
-                    (19, "条件説明文8"),
-                    (20, "条件説明文9"),
-                    (24,"実行条件：メイドクラス（取得している）"),
-                    (25,"実行条件：所持性癖")
-
-				}, sw);
-                WriteSimpleData("schedule_work_noon.nei", new[]
-                {
-
-                    (1, "名前"),
-                    (2, "フリーコメント")
+                    (1, "スケジュール/カテゴリー/"),
+                    //(7, "説明"),
+                    (12, "スケジュール/項目/"),
+                    (13, "スケジュール/項目/"),
+                    (14, "スケジュール/項目/"),
+                    (15, "スケジュール/項目/"),
+                    (16, "スケジュール/項目/"),
+                    (17, "スケジュール/項目/"),
+                    (18, "スケジュール/項目/"),
+                    (19, "スケジュール/項目/"),
+                    (20, "スケジュール/項目/"),
+                    //(24,"実行条件：メイドクラス（取得している）"),
+                    //(25,"実行条件：所持性癖")
 
                 }, sw);
-				WriteSimpleData("schedule_work_night_category_list.nei", new[]
+                
+				WriteSimpleData("schedule_work_noon.nei", new[]
                 {
-                    (1, "表示名")
+
+                    (1, "スケジュール/項目/")
+
+                }, sw);
+                WriteSimpleData("schedule_work_night_category_list.nei", new[]
+                {
+                    (1, "スケジュール/カテゴリー/")
                 }, sw);
 			}
         }
@@ -728,7 +735,7 @@ namespace TranslationExtract
             using var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding);
 
             sw.WriteLine("Key,Type,Desc,Japanese,English");
-            sw.WriteCSV("schedule_work_night.nei", "ScreneDaily", (parser, i) => new
+            sw.WriteCSV("schedule_work_night.nei", "SceneDaily", (parser, i) => new
                         {
                             vipName = parser.GetCellAsString(1, i),
                             vipDescription = parser.GetCellAsString(7, i)
