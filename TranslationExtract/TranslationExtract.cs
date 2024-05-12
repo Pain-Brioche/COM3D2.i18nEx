@@ -544,6 +544,10 @@ namespace TranslationExtract
                     (2, "フリーコメント")
 
                 }, sw);
+				WriteSimpleData("schedule_work_night_category_list.nei", new[]
+                {
+                    (1, "表示名")
+                }, sw);
 			}
         }
 
@@ -732,7 +736,7 @@ namespace TranslationExtract
                         arg => new[] { arg.vipName, arg.vipDescription },
                         opts.skipTranslatedItems);
         }
-
+        /*
         private void DumpScheduleWorkCategory(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
@@ -755,6 +759,7 @@ namespace TranslationExtract
                             opts.skipTranslatedItems);
             }
         }
+        */
 
         private string EscapeCSVItem(string str)
         {
@@ -782,7 +787,7 @@ namespace TranslationExtract
             if (opts.dumpEvents)
             {
                 DumpScenarioEvents(opts);
-                DumpScheduleWorkCategory(opts);
+                //DumpScheduleWorkCategory(opts);
             }
 
             if (opts.dumpPersonalies)
