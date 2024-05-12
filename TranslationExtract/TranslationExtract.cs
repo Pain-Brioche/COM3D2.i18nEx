@@ -494,25 +494,25 @@ namespace TranslationExtract
                                         .Select(column => parser.GetCellAsString(column.Item1, i))
                                         .ToList();
 
-                        var something = new
+                        var translationData = new
                         {
                             id = parser.GetCellAsInteger(0, i),
-                            columnTranslation = columnText
+                            columnText = columnText
 					    };
 
-                        return something;
+                        return translationData;
                     },
                     arg =>
                     {
-                        var result = new string[columnNames.Count()];
+                        var keys = new string[columnNames.Count()];
                         var index = 0;
                         foreach (var columnTranslation in columnNames)
                         {
-                            result[index++] = arg.id + "\\" + columnTranslation.Item2;
+                            keys[index++] = arg.id + "\\" + columnTranslation.Item2;
 					    }
-                        return result;
+                        return keys;
                     },
-                    arg => arg.columnTranslation);
+                    arg => arg.columnText);
 			}
 
             var encoding = new UTF8Encoding(true);
