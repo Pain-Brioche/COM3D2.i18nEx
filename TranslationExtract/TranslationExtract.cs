@@ -657,6 +657,29 @@ namespace TranslationExtract
                         opts.skipTranslatedItems);
         }
 
+        private void DumpScheduleWorkCategory(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_schedule_category");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting Schedule categories");
+
+            var encoding = new UTF8Encoding(true);
+            using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding))
+            {
+                sw.WriteLine("Key,Type,Desc,Japanese,English");
+                sw.WriteCSV("schedule_work_night_category_list.nei", "SceneDaily",
+                            (parser, i) => new
+                            {
+                                skillName = parser.GetCellAsString(1, i)
+                            },
+                            arg => new[] { arg.skillName },
+                            arg => new[] { arg.skillName },
+                            opts.skipTranslatedItems);
+            }
+        }
+
         private string EscapeCSVItem(string str)
         {
             if (str.Contains("\n") || str.Contains("\"") || str.Contains(","))
@@ -678,7 +701,10 @@ namespace TranslationExtract
                 DumpItemNames(opts);
 
             if (opts.dumpEvents)
+            {
                 DumpScenarioEvents(opts);
+                DumpScheduleWorkCategory(opts);
+            }
 
             if (opts.dumpPersonalies)
                 DumpPersonalityNames(opts);
