@@ -33,7 +33,13 @@ namespace TranslationExtract
                 yield return (enum1.Current, enum2.Current);
         }
 
-        public static void WriteCSV<T>(this StreamWriter sw,
+        public static bool ContainsJapaneseCharacters(this string input)
+        {
+            var regex = new Regex(@"[\p{IsHiragana}\p{IsKatakana}\p{IsCJKUnifiedIdeographs}]");
+            return regex.IsMatch(input);
+        }
+
+		public static void WriteCSV<T>(this StreamWriter sw,
                                        string neiFile,
                                        string csvFile,
                                        Func<CsvParser, int, T> selector,
@@ -56,13 +62,16 @@ namespace TranslationExtract
 
                 foreach (var (prefix, tl) in prefixes.ZipWith(translations))
                 {
-                    if (skipIfExists && LocalizationManager.TryGetTranslation($"{csvFile}/{prefix}", out var _))
+                    if (skipIfExists && (LocalizationManager.TryGetTranslation($"{csvFile}/{prefix}", out var _)) ||
+                        tl.ContainsJapaneseCharacters() == false)
                         continue;
 
-                    var csvName = EscapeCSVItem(tl);
+                    if (string.IsNullOrEmpty(tl))
+                        continue;
+
+					var csvName = EscapeCSVItem(tl);
                     if (!csvName.StartsWith("\""))
                         csvName = $"\"{csvName}\"";
-
 
                     sw.WriteLine($"\"{prefix}\",Text,,{csvName},");
                 }
@@ -468,8 +477,77 @@ namespace TranslationExtract
             NpcNames.Clear();
             filesToSkip.Clear();
         }
+        private void DumpSchedule(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_schedule");
+            Directory.CreateDirectory(unitPath);
 
-        private void DumpScenarioEvents(DumpOptions opts)
+            Debug.Log("Getting schedule.");
+
+            void WriteSimpleData(string file, IList<(int, string)> columnNames, StreamWriter sw)
+            {
+				sw.WriteCSV(file, "Schedule",
+                    (parser, i) =>
+                    {
+                        var columnText = columnNames
+                                        .Select(column => parser.GetCellAsString(column.Item1, i))
+                                        .ToList();
+
+                        var something = new
+                        {
+                            id = parser.GetCellAsInteger(0, i),
+                            columnTranslation = columnText
+					    };
+
+                        return something;
+                    },
+                    arg =>
+                    {
+                        var result = new string[columnNames.Count()];
+                        var index = 0;
+                        foreach (var columnTranslation in columnNames)
+                        {
+                            result[index++] = arg.id + "\\" + columnTranslation.Item2;
+					    }
+                        return result;
+                    },
+                    arg => arg.columnTranslation);
+			}
+
+            var encoding = new UTF8Encoding(true);
+            using (var sw = new StreamWriter(Path.Combine(unitPath, "Schedule.csv"), false, encoding))
+            {
+                sw.WriteLine("Key,Type,Desc,Japanese,English");
+                WriteSimpleData("schedule_work_night.nei", new[]
+                {
+                    (1, "イベント名"),
+                    //(2, "イベント内容"),
+                    (7, "説明"),
+                    (12, "条件説明文1"),
+                    (13, "条件説明文2"),
+                    (14, "条件説明文3"),
+                    (15, "条件説明文4"),
+                    (16, "条件説明文5"),
+                    (17, "条件説明文6"),
+                    (18, "条件説明文7"),
+                    (19, "条件説明文8"),
+                    (20, "条件説明文9"),
+                    (24,"実行条件：メイドクラス（取得している）"),
+                    (25,"実行条件：所持性癖")
+
+				}, sw);
+                WriteSimpleData("schedule_work_noon.nei", new[]
+                {
+
+                    (1, "名前"),
+                    (2, "フリーコメント")
+
+                }, sw);
+			}
+        }
+
+		private void DumpScenarioEvents(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
             var unitPath = Path.Combine(i2Path, "zzz_scenario_events");
@@ -556,8 +634,6 @@ namespace TranslationExtract
                             arg => new[] { $"{prefix}/{arg.uniqueName}" },
                             arg => new[] { arg.displayName },
                             opts.skipTranslatedItems);
-
-                
             }
 
             var encoding = new UTF8Encoding(true);
@@ -669,7 +745,10 @@ namespace TranslationExtract
             Debug.Log("Dumping game localisation files! Please be patient!");
 
             if (opts.dumpUITranslations)
+            {
                 DumpUI();
+                DumpSchedule(opts);
+            }
 
             if (opts.dumpScripts)
                 DumpScripts();
