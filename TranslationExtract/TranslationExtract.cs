@@ -15,6 +15,7 @@ namespace TranslationExtract
 {
     internal static class Extensions
     {
+
         private static string EscapeCSVItem(string str)
         {
             if (str.Contains("\n") || str.Contains("\"") || str.Contains(","))
@@ -64,7 +65,7 @@ namespace TranslationExtract
                 var item = selector(scenarioNei, i);
                 var prefixes = toString(item);
                 var translations = toTranslation(item);
-
+                
                 foreach (var (prefix, tl) in prefixes.ZipWith(translations))
                 {
                     if (skipIfExists && ((LocalizationManager.TryGetTranslation($"{csvFile}/{prefix}", out var _)) ||
@@ -77,10 +78,11 @@ namespace TranslationExtract
 					var csvName = EscapeCSVItem(tl);
                     if (!csvName.StartsWith("\""))
                         csvName = $"\"{csvName}\"";
-
+                    
                     var cleanPrefix = prefix.Replace("×", "_");
 
-					sw.WriteLine($"\"{cleanPrefix}\",Text,,{csvName},");
+                    sw.WriteLine($"\"{cleanPrefix}\",Text,,{csvName},");
+
                 }
             }
         }
@@ -493,14 +495,26 @@ namespace TranslationExtract
 
             Debug.Log("Getting schedule.");
 
-            void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw)
+
+            //specialKeyColumn if for when we need another colum used in the key
+            void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw, int specialKeyColumn = 0)
             {
 				sw.WriteCSV(file, "SceneDaily",
                     (parser, i) =>
                     {
+
                         var columnText = columnIndexName
-                                        .Select(column => (column.Item2, parser.GetCellAsString(column.Item1, i)))
-                                        .ToList();
+                                         .Select(column => (column.Item2, parser.GetCellAsString(column.Item1, i)))
+                                         .ToList();
+
+
+                        if(specialKeyColumn != 0)
+                        {
+                            columnText = columnIndexName
+                                             .Select(column => ($"{column.Item2}{parser.GetCellAsString(specialKeyColumn, i)}", parser.GetCellAsString(column.Item1, i)))
+                                             .ToList();
+                        }
+
 
                         var translationData = new
                         {
@@ -516,22 +530,43 @@ namespace TranslationExtract
                         var index = 0;
                         foreach (var columnTranslation in arg.columnText)
                         {
-                            keys[index++] = columnTranslation.Item1 + columnTranslation.Item2;
-					    }
+                            if (specialKeyColumn != 0)
+                                keys[index++] = columnTranslation.Item1;
+                            else
+                                keys[index++] = columnTranslation.Item1 + columnTranslation.Item2;
+                        }
                         return keys;
                     },
                     arg => arg.columnText.Select(r => r.Item2), 
                     opts.skipTranslatedItems);
 			}
 
+
+
             var encoding = new UTF8Encoding(true);
             using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding))
             {
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
+
+                //For translation reasons conditions will be extracted after Names and descriptions
                 WriteSimpleData("schedule_work_night.nei", new[]
                 {
-                    (1, "スケジュール/カテゴリー/"),
-                    //(7, "説明"),
+                    //Schedule Titles
+                    (1, "スケジュール/項目/"),
+
+                }, sw);
+
+                //For translation reasons conditions will be extracted after Names and descriptions
+                WriteSimpleData("schedule_work_night.nei", new[]
+                {
+                    //Schedule descriptions
+                    (7, $"スケジュール/説明/"),
+
+                }, sw, 1);
+
+                WriteSimpleData("schedule_work_night.nei", new[]
+                {
+                    //Schedule conditions
                     (12, "スケジュール/条件文/"),
                     (13, "スケジュール/条件文/"),
                     (14, "スケジュール/条件文/"),
@@ -545,18 +580,34 @@ namespace TranslationExtract
                     //(25,"実行条件：所持性癖")
 
                 }, sw);
-                
-				WriteSimpleData("schedule_work_noon.nei", new[]
-                {
 
+
+                WriteSimpleData("schedule_work_noon.nei", new[]
+                {
+                    //Schedule Training
                     (1, "スケジュール/項目/")
 
                 }, sw);
                 WriteSimpleData("schedule_work_night_category_list.nei", new[]
                 {
+                    //Schedule Categories
                     (1, "スケジュール/カテゴリー/")
                 }, sw);
 			}
+
+            using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneFacilityManagement.csv"), false, encoding))
+            {
+                sw.WriteLine("Key,Type,Desc,Japanese,English");
+
+                //For translation reasons conditions will be extracted after Names and descriptions
+                WriteSimpleData("schedule_work_night.nei", new[]
+                {
+                    //Schedule Facilities
+                    (7, "施設名/"),
+
+                }, sw);
+            }
+
         }
 
 		private void DumpScenarioEvents(DumpOptions opts)
