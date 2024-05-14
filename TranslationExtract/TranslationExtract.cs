@@ -496,7 +496,7 @@ namespace TranslationExtract
             Debug.Log("Getting schedule.");
 
 
-            //specialKeyColumn if for when we need another colum used in the key
+            //specialKeyColumn for when we need another colum used in as the key
             void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw, int specialKeyColumn = 0)
             {
 				sw.WriteCSV(file, "SceneDaily",
@@ -556,7 +556,7 @@ namespace TranslationExtract
 
                 }, sw);
 
-                //For translation reasons conditions will be extracted after Names and descriptions
+                //This part needs a special key
                 WriteSimpleData("schedule_work_night.nei", new[]
                 {
                     //Schedule descriptions
