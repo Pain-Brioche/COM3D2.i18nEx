@@ -8,14 +8,15 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using BepInEx;
+using BepInEx.Logging;
 using I2.Loc;
+using MonoMod.RuntimeDetour.Platforms;
 using UnityEngine;
 
 namespace TranslationExtract
 {
     internal static class Extensions
     {
-
         private static string EscapeCSVItem(string str)
         {
             if (str.Contains("\n") || str.Contains("\"") || str.Contains(","))
@@ -53,6 +54,8 @@ namespace TranslationExtract
                                        Func<T, IEnumerable<string>> toTranslation,
                                        bool skipIfExists = false)
         {
+
+            List<string> cleanPrefixesCache = new List<string>();
             using var f = GameUty.FileOpen(neiFile);
             using var scenarioNei = new CsvParser();
             scenarioNei.Open(f);
@@ -81,8 +84,12 @@ namespace TranslationExtract
                     
                     var cleanPrefix = prefix.Replace("×", "_");
 
-                    sw.WriteLine($"\"{cleanPrefix}\",Text,,{csvName},");
-
+                    //Avoid duplicated entries
+                    if (!cleanPrefixesCache.Contains(cleanPrefix))
+                    {
+                        sw.WriteLine($"\"{cleanPrefix}\",Text,,{csvName},");
+                        cleanPrefixesCache.Add(cleanPrefix);
+                    }
                 }
             }
         }
@@ -497,7 +504,7 @@ namespace TranslationExtract
 
 
             //specialKeyColumn for when we need another colum used in as the key
-            void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw, int specialKeyColumn = 0)
+            void WriteSimpleData(string file, IList<(int, string)> columnIndexName, StreamWriter sw, int specialKeyColumn = -1)
             {
 				sw.WriteCSV(file, "SceneDaily",
                     (parser, i) =>
@@ -508,7 +515,7 @@ namespace TranslationExtract
                                          .ToList();
 
 
-                        if(specialKeyColumn != 0)
+                        if(specialKeyColumn != -1)
                         {
                             columnText = columnIndexName
                                              .Select(column => ($"{column.Item2}{parser.GetCellAsString(specialKeyColumn, i)}", parser.GetCellAsString(column.Item1, i)))
@@ -526,11 +533,11 @@ namespace TranslationExtract
                     },
                     arg =>
                     {
-                        var keys = new string[arg.columnText.Count()];
+                        var keys = new string[arg.columnText.Count];
                         var index = 0;
                         foreach (var columnTranslation in arg.columnText)
                         {
-                            if (specialKeyColumn != 0)
+                            if (specialKeyColumn != -1)
                                 keys[index++] = columnTranslation.Item1;
                             else
                                 keys[index++] = columnTranslation.Item1 + columnTranslation.Item2;
@@ -588,18 +595,34 @@ namespace TranslationExtract
                     (1, "スケジュール/項目/")
 
                 }, sw);
+
+                WriteSimpleData("schedule_work_easyyotogi.nei", new[]
+{
+                    //Schedule Easy yotogi Titles (training books)
+                    (1, "スケジュール/項目/")
+
+                }, sw);
+
+                WriteSimpleData("schedule_work_easyyotogi.nei", new[]
+{
+                    //Schedule Easy yotogi Descriptions (training books)
+                    (5, "スケジュール/説明/")
+
+                }, sw, 1);
+
                 WriteSimpleData("schedule_work_night_category_list.nei", new[]
                 {
                     //Schedule Categories
                     (1, "スケジュール/カテゴリー/")
-                }, sw);
-			}
 
+                }, sw);
+            }
+
+            /*
             using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneFacilityManagement.csv"), false, encoding))
             {
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
 
-                //For translation reasons conditions will be extracted after Names and descriptions
                 WriteSimpleData("schedule_work_night.nei", new[]
                 {
                     //Schedule Facilities
@@ -607,6 +630,7 @@ namespace TranslationExtract
 
                 }, sw);
             }
+            */
 
         }
 
