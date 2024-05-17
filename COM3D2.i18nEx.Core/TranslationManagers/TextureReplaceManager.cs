@@ -38,10 +38,10 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
         private readonly LinkedList<TextureReplacement> texReplacementCache = new();
 
         private readonly Dictionary<string, LinkedListNode<TextureReplacement>> texReplacementLookup =
-            new(StringComparer.InvariantCultureIgnoreCase);
+            new(StringComparer.OrdinalIgnoreCase);
 
         private readonly Dictionary<string, string> textureReplacements =
-            new(StringComparer.InvariantCultureIgnoreCase);
+            new(StringComparer.OrdinalIgnoreCase);
 
         private void Update()
         {

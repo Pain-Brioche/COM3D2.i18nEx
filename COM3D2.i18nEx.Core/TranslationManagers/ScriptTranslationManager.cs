@@ -42,10 +42,10 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
         public string FullPath { get; }
 
         public Dictionary<string, string> Translations { get; } =
-            new(StringComparer.InvariantCultureIgnoreCase);
+            new(StringComparer.OrdinalIgnoreCase);
 
         public Dictionary<string, List<SubtitleData>> Subtitles { get; }
-            = new(StringComparer.InvariantCultureIgnoreCase);
+            = new(StringComparer.OrdinalIgnoreCase);
 
         private void ParseVoiceSubtitle(string line)
         {
@@ -102,7 +102,7 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
             new();
 
         private readonly Dictionary<string, string> translationFiles =
-            new(StringComparer.InvariantCultureIgnoreCase);
+            new(StringComparer.OrdinalIgnoreCase);
 
         private ScriptTranslationFile namesFile;
 
