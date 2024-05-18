@@ -159,11 +159,12 @@ namespace TranslationExtract
                         Toggle("UI translations", ref options.dumpUITranslations);
 
                         GUILayout.Label("Advanced dumps");
-                        Toggle(".menu item names", ref options.dumpItemNames);
-                        Toggle("VIP event names", ref options.dumpVIPEvents);
-                        Toggle("Yotogi skills", ref options.dumpYotogis);
-                        Toggle("Maid stats", ref options.dumpPersonalies);
-                        Toggle("Event names", ref options.dumpEvents);
+                        Toggle("Events names", ref options.dumpEvents);
+                        Toggle("Schedule Event names", ref options.dumpVIPEvents);
+                        Toggle("Yotogi", ref options.dumpYotogis);
+                        Toggle("Maid status", ref options.dumpMaidStatus);
+                        Toggle("Trophy", ref options.dumpTrophy);
+                        Toggle(".menu", ref options.dumpItemNames);
 
                         GUILayout.Label("Other");
                         Toggle("Skip translated items", ref options.skipTranslatedItems);
@@ -494,6 +495,29 @@ namespace TranslationExtract
             filesToSkip.Clear();
         }
 
+        private void DumpScenarioEvents(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_scenario_events");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting scenario event data");
+
+            var encoding = new UTF8Encoding(true);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneScenarioSelect.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("select_scenario_data.nei", "SceneScenarioSelect",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsInteger(0, i),
+                            name = parser.GetCellAsString(1, i),
+                            description = parser.GetCellAsString(2, i)
+                        },
+                        arg => new[] { $"{arg.id}/タイトル", $"{arg.id}/内容" },
+                        arg => new[] { arg.name, arg.description });
+        }
+
         private void DumpSchedule(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
@@ -617,44 +641,29 @@ namespace TranslationExtract
 
                 }, sw);
             }
-
-            /*
-            using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneFacilityManagement.csv"), false, encoding))
-            {
-                sw.WriteLine("Key,Type,Desc,Japanese,English");
-
-                WriteSimpleData("schedule_work_night.nei", new[]
-                {
-                    //Schedule Facilities
-                    (7, "施設名/"),
-
-                }, sw);
-            }
-            */
-
         }
 
-		private void DumpScenarioEvents(DumpOptions opts)
+        //Old Schedule method
+        private void DumpVIPEvents(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
-            var unitPath = Path.Combine(i2Path, "zzz_scenario_events");
+            var unitPath = Path.Combine(i2Path, "zzz_vip_event");
             Directory.CreateDirectory(unitPath);
 
-            Debug.Log("Getting scenario event data");
+            Debug.Log("Getting VIP event names");
 
             var encoding = new UTF8Encoding(true);
-            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneScenarioSelect.csv"), false, encoding);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding);
 
             sw.WriteLine("Key,Type,Desc,Japanese,English");
-            sw.WriteCSV("select_scenario_data.nei", "SceneScenarioSelect",
-                        (parser, i) => new
-                        {
-                            id = parser.GetCellAsInteger(0, i),
-                            name = parser.GetCellAsString(1, i),
-                            description = parser.GetCellAsString(2, i)
-                        },
-                        arg => new[] { $"{arg.id}/タイトル", $"{arg.id}/内容" },
-                        arg => new[] { arg.name, arg.description });
+            sw.WriteCSV("schedule_work_night.nei", "SceneDaily", (parser, i) => new
+            {
+                vipName = parser.GetCellAsString(1, i),
+                vipDescription = parser.GetCellAsString(7, i)
+            },
+                        arg => new[] { $"スケジュール/項目/{arg.vipName}", $"スケジュール/説明/{arg.vipDescription}" },
+                        arg => new[] { arg.vipName, arg.vipDescription },
+                        opts.skipTranslatedItems);
         }
 
         private void DumpItemNames(DumpOptions opts)
@@ -703,7 +712,7 @@ namespace TranslationExtract
                 keyValuePair.Value.Dispose();
         }
 
-        private void DumpPersonalityNames(DumpOptions opts)
+        private void DumpMaidStatus(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
             var unitPath = Path.Combine(i2Path, "zzz_personalities");
@@ -796,28 +805,29 @@ namespace TranslationExtract
                     sw.WriteLine($"{csvName},Text,,{csvName},");
                 }
             }
-        }
+        }        
 
-        private void DumpVIPEvents(DumpOptions opts)
+        private void DumpTrophy(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
-            var unitPath = Path.Combine(i2Path, "zzz_vip_event");
+            var unitPath = Path.Combine(i2Path, "zzz_trophy");
             Directory.CreateDirectory(unitPath);
 
-            Debug.Log("Getting VIP event names");
+            Debug.Log("Getting Trophy data");
 
             var encoding = new UTF8Encoding(true);
-            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneDaily.csv"), false, encoding);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneTrophy.csv"), false, encoding);
 
             sw.WriteLine("Key,Type,Desc,Japanese,English");
-            sw.WriteCSV("schedule_work_night.nei", "SceneDaily", (parser, i) => new
+            sw.WriteCSV("trophy_list.nei", "SceneTrophy",
+                        (parser, i) => new
                         {
-                            vipName = parser.GetCellAsString(1, i),
-                            vipDescription = parser.GetCellAsString(7, i)
+                            id = parser.GetCellAsInteger(0, i),
+                            name = parser.GetCellAsString(2, i),
+                            description = parser.GetCellAsString(8, i)
                         },
-                        arg => new[] { $"スケジュール/項目/{arg.vipName}", $"スケジュール/説明/{arg.vipDescription}" },
-                        arg => new[] { arg.vipName, arg.vipDescription },
-                        opts.skipTranslatedItems);
+                        arg => new[] { $"{arg.id}/トロフィー名", $"{arg.id}/説明" },
+                        arg => new[] { arg.name, arg.description });
         }
 
         private string EscapeCSVItem(string str)
@@ -832,31 +842,33 @@ namespace TranslationExtract
             Debug.Log("Dumping game localisation files! Please be patient!");
 
             if (opts.dumpUITranslations)
-            {
                 DumpUI();
-                DumpSchedule(opts);
-            }
-
+            
             if (opts.dumpScripts)
                 DumpScripts();
 
             if (opts.dumpItemNames)
                 DumpItemNames(opts);
 
-            if (opts.dumpEvents)
-            {
-                DumpScenarioEvents(opts);
-                //DumpScheduleWorkCategory(opts);
-            }
-
-            if (opts.dumpPersonalies)
-                DumpPersonalityNames(opts);
+            if (opts.dumpMaidStatus)
+                DumpMaidStatus(opts);
 
             if (opts.dumpYotogis)
                 DumpYotogiData(opts);
 
+            if (opts.dumpEvents)
+                DumpScenarioEvents(opts);
+
             if (opts.dumpVIPEvents)
-                DumpVIPEvents(opts);
+            {
+                DumpSchedule(opts);
+                //Old Method
+                //DumpVIPEvents(opts);
+            }
+                
+
+            if(opts.dumpTrophy)
+                DumpTrophy(opts);
 
             if (opts.dumpScripts)
                 Debug.Log($"Dumped {translatedLines} lines");
@@ -880,11 +892,13 @@ namespace TranslationExtract
         {
             public bool dumpEvents;
             public bool dumpItemNames;
-            public bool dumpPersonalies;
+            public bool dumpMaidStatus;
             public bool dumpScripts = true;
             public bool dumpUITranslations = true;
             public bool dumpVIPEvents;
             public bool dumpYotogis;
+            public bool dumpTrophy;
+            public bool dumpSchedule;
             public bool skipTranslatedItems;
             public DumpOptions() { }
 
@@ -895,8 +909,10 @@ namespace TranslationExtract
                 dumpItemNames = other.dumpItemNames;
                 dumpVIPEvents = other.dumpVIPEvents;
                 dumpYotogis = other.dumpYotogis;
-                dumpPersonalies = other.dumpPersonalies;
+                dumpMaidStatus = other.dumpMaidStatus;
                 dumpEvents = other.dumpEvents;
+                dumpTrophy = other.dumpTrophy;
+                dumpSchedule = other.dumpSchedule;
                 skipTranslatedItems = other.skipTranslatedItems;
             }
         }
