@@ -50,7 +50,7 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
                 foreach (var tlFile in tlFiles)
                 {
                     //Fixes subfoldered files being loaded improperly.
-                    var categoryName = Path.GetFileName(tlFile);//tlFile.Replace("\\", "/").Splice(0, -5);
+                    var categoryName = Path.GetFileNameWithoutExtension(tlFile);//tlFile.Replace("\\", "/").Splice(0, -5);
 
 					if (Configuration.I2Translation.VerboseLogging.Value)
                         Core.Logger.LogInfo($"Loading category {categoryName}");
