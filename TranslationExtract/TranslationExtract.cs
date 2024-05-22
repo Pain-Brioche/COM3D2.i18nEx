@@ -165,7 +165,7 @@ namespace TranslationExtract
                         Toggle("Maid Status", ref options.dumpMaidStatus);
                         Toggle("Trophy", ref options.dumpTrophy);
                         Toggle("NPC", ref options.dumpNPC);
-                        Toggle("Gueest Mode", ref options.dumpGuest);
+                        Toggle("Guest Mode", ref options.dumpGuest);
                         Toggle(".menu", ref options.dumpItemNames);
 
                         GUILayout.Label("Other");
@@ -918,21 +918,45 @@ namespace TranslationExtract
 
             sw.Dispose();
 
-            //Rooms
+            //guest mode Rooms
             using var sw2 = new StreamWriter(Path.Combine(unitPath, "SceneKasizukiMainMenu.csv"), true, encoding);
-
-            sw2.WriteLine("Key,Type,Desc,Japanese,English");
+            sw2.WriteLine("----------------ROOMS----------------,,,,");
             sw2.WriteCSV("kasizuki_room_list.nei", "SceneKasizukiMainMenu",
                         (parser, i) => new
                         {
-                            roomName = parser.GetCellAsString(4, i),
+                            //roomName = parser.GetCellAsString(4, i),
                             roomDisplayedName = parser.GetCellAsString(5, i),
                             roomDescription = parser.GetCellAsString(7, i)
                         },
-                        arg => new[] { $"部屋名/{arg.roomName}", $"部屋説明/{arg.roomName}" },
+                        arg => new[] { $"部屋名/{arg.roomDisplayedName}", $"部屋説明/{arg.roomDisplayedName}" },
                         arg => new[] { arg.roomDisplayedName, arg.roomDescription });
 
-            //TODO: Scenarios
+            //guest mode Scenarios
+            sw2.WriteLine("----------------SCENARIOS----------------,,,,");
+            sw2.WriteCSV("kasizuki_play_list.nei", "SceneKasizukiMainMenu",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsString(0, i),
+                            scenarioTitle = parser.GetCellAsString(3, i),
+                            scenarioDescription = parser.GetCellAsString(4, i)
+                        },
+                        arg => new[] { $"プレイタイトル/{arg.id}", $"プレイ内容/{arg.id}" },
+                        arg => new[] { arg.scenarioTitle, arg.scenarioDescription });
+
+            //guest mode Scenarios conditions
+            sw2.WriteLine("----------------CONDITIONS----------------,,,,");
+            sw2.WriteCSV("kasizuki_play_list.nei", "SceneKasizukiMainMenu",
+            (parser, i) => new
+            {
+                condition1 = parser.GetCellAsString(5, i),
+                condition2 = parser.GetCellAsString(6, i),
+                condition3 = parser.GetCellAsString(7, i),
+                condition4 = parser.GetCellAsString(8, i),
+                condition5 = parser.GetCellAsString(9, i),
+                condition6 = parser.GetCellAsString(10, i)
+            },
+            arg => new[] { $"プレイ条件/{arg.condition1}", $"プレイ条件/{arg.condition2}", $"プレイ条件/{arg.condition3}", $"プレイ条件/{arg.condition4}", $"プレイ条件/{arg.condition5}", $"プレイ条件/{arg.condition6}"},
+            arg => new[] { arg.condition1, arg.condition2, arg.condition3, arg.condition4, arg.condition5, arg.condition6, });
         }
 
         private string EscapeCSVItem(string str)
