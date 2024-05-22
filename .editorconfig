@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# S1199: Nested code blocks should not be used
+dotnet_diagnostic.S1199.severity = none

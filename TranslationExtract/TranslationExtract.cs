@@ -72,7 +72,7 @@ namespace TranslationExtract
                 foreach (var (prefix, tl) in prefixes.ZipWith(translations))
                 {
                     if (skipIfExists && ((LocalizationManager.TryGetTranslation($"{csvFile}/{prefix}", out var _)) ||
-                        tl.ContainsJapaneseCharacters() == false))
+                        !tl.ContainsJapaneseCharacters() ))
                         continue;
 
                     if (string.IsNullOrEmpty(tl))
@@ -100,7 +100,7 @@ namespace TranslationExtract
     {
         public const string TL_DIR = "COM3D2_Localisation";
         private const int WIDTH = 200;
-        private const int HEIGHT = 400;
+        private const int HEIGHT = 450;
         private const int MARGIN_X = 5;
         private const int MARGIN_TOP = 20;
         private const int MARGIN_BOTTOM = 5;
@@ -158,12 +158,14 @@ namespace TranslationExtract
                         Toggle("Story scripts", ref options.dumpScripts);
                         Toggle("UI translations", ref options.dumpUITranslations);
 
-                        GUILayout.Label("Advanced dumps");
-                        Toggle("Events names", ref options.dumpEvents);
-                        Toggle("Schedule Event names", ref options.dumpVIPEvents);
+                        GUILayout.Label("Advanced Dumps");
+                        Toggle("Scenario Events", ref options.dumpEvents);
+                        Toggle("Schedule Events", ref options.dumpVIPEvents);
                         Toggle("Yotogi", ref options.dumpYotogis);
-                        Toggle("Maid status", ref options.dumpMaidStatus);
+                        Toggle("Maid Status", ref options.dumpMaidStatus);
                         Toggle("Trophy", ref options.dumpTrophy);
+                        Toggle("NPC", ref options.dumpNPC);
+                        Toggle("Gueest Mode", ref options.dumpGuest);
                         Toggle(".menu", ref options.dumpItemNames);
 
                         GUILayout.Label("Other");
@@ -715,10 +717,10 @@ namespace TranslationExtract
         private void DumpMaidStatus(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
-            var unitPath = Path.Combine(i2Path, "zzz_personalities");
+            var unitPath = Path.Combine(i2Path, "zzz_maid_status");
             Directory.CreateDirectory(unitPath);
 
-            Debug.Log("Getting personality names");
+            Debug.Log("Getting Maid's Status");
 
             void WriteSimpleData(string file, string prefix, StreamWriter sw, int dataCol = 2, int idCol = 1)
             {
@@ -760,6 +762,8 @@ namespace TranslationExtract
             Debug.Log("Getting yotogi skills and commands");
 
             var encoding = new UTF8Encoding(true);
+
+            //Yotogi Skills
             using (var sw = new StreamWriter(Path.Combine(unitPath, "YotogiSkillName.csv"), false, encoding))
             {
                 sw.WriteLine("Key,Type,Desc,Japanese,English");
@@ -773,6 +777,7 @@ namespace TranslationExtract
                             opts.skipTranslatedItems);
             }
 
+            //Yotogi Commands
             var commandNames = new HashSet<string>();
             using (var sw = new StreamWriter(Path.Combine(unitPath, "YotogiSkillCommand.csv"), false, encoding))
             {
@@ -805,6 +810,20 @@ namespace TranslationExtract
                     sw.WriteLine($"{csvName},Text,,{csvName},");
                 }
             }
+
+            //Yotogi rooms names
+            using (var sw = new StreamWriter(Path.Combine(unitPath, "SceneYotogi.csv"), false, encoding))
+            {
+                sw.WriteLine("Key,Type,Desc,Japanese,English");
+                sw.WriteCSV("yotogi_stage_list.nei", "SceneYotogi",
+                            (parser, i) => new
+                            {
+                                stageName = parser.GetCellAsString(2, i)
+                            },
+                            arg => new[] { $"背景タイプ/{arg.stageName}" },
+                            arg => new[] { arg.stageName },
+                            opts.skipTranslatedItems);
+            }
         }        
 
         private void DumpTrophy(DumpOptions opts)
@@ -828,6 +847,92 @@ namespace TranslationExtract
                         },
                         arg => new[] { $"{arg.id}/トロフィー名", $"{arg.id}/説明" },
                         arg => new[] { arg.name, arg.description });
+        }
+
+        private void DumpNPC(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_npc_edit");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting NPC data");
+
+            var encoding = new UTF8Encoding(true);
+
+            //NPC Maids
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneNPCEdit.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("npcedit_list.nei", "SceneNPCEdit",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsInteger(0, i),
+                            name = parser.GetCellAsString(1, i),
+                            description = parser.GetCellAsString(6, i)
+                        },
+                        arg => new[] { $"{arg.id}/苗字", $"{arg.id}/名前", $"{arg.id}/説明" },
+                        arg => new[] { arg.name, arg.name, arg.description });
+
+
+
+            //Extra Maids
+            using var sw2 = new StreamWriter(Path.Combine(unitPath, "SubMaid.csv"), false, encoding);
+
+            sw2.WriteLine("Key,Type,Desc,Japanese,English");
+            sw2.WriteCSV("maid_status_submaid_list.nei", "SubMaid",
+                        (parser, i) => new
+                        {
+
+                            name = parser.GetCellAsString(1, i),
+                            char_type = parser.GetCellAsString(11, i),
+                            stat_stype = parser.GetCellAsString(12, i)
+                        },
+                        arg => new[] { $"{arg.name}/性格", $"{arg.name}/状態" },
+                        arg => new[] { arg.char_type, arg.stat_stype });
+        }
+
+        private void DumpGuest(DumpOptions dumpOptions)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_guest_mode");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting NPC data");
+
+            var encoding = new UTF8Encoding(true);
+
+            //Guests profiles
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneKasizukiMainMenu.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("kasizuki_man_list.nei", "SceneKasizukiMainMenu",
+                        (parser, i) => new
+                        {
+                            name = parser.GetCellAsString(1, i),
+                            displayedName = parser.GetCellAsString(2,i),
+                            profile = parser.GetCellAsString(4, i),
+                            prefered_play = parser.GetCellAsString(5, i)
+                        },
+                        arg => new[] { $"男名/{arg.name}", $"男プロフ/{arg.name}", $"男好プレイ/{arg.name}" },
+                        arg => new[] { arg.displayedName, arg.profile, arg.prefered_play });
+
+            sw.Dispose();
+
+            //Rooms
+            using var sw2 = new StreamWriter(Path.Combine(unitPath, "SceneKasizukiMainMenu.csv"), true, encoding);
+
+            sw2.WriteLine("Key,Type,Desc,Japanese,English");
+            sw2.WriteCSV("kasizuki_room_list.nei", "SceneKasizukiMainMenu",
+                        (parser, i) => new
+                        {
+                            roomName = parser.GetCellAsString(4, i),
+                            roomDisplayedName = parser.GetCellAsString(5, i),
+                            roomDescription = parser.GetCellAsString(7, i)
+                        },
+                        arg => new[] { $"部屋名/{arg.roomName}", $"部屋説明/{arg.roomName}" },
+                        arg => new[] { arg.roomDisplayedName, arg.roomDescription });
+
+            //TODO: Scenarios
         }
 
         private string EscapeCSVItem(string str)
@@ -864,11 +969,16 @@ namespace TranslationExtract
                 DumpSchedule(opts);
                 //Old Method
                 //DumpVIPEvents(opts);
-            }
-                
+            }                
 
             if(opts.dumpTrophy)
                 DumpTrophy(opts);
+
+            if (options.dumpNPC)
+                DumpNPC(opts);
+
+            if (options.dumpGuest)
+                DumpGuest(opts);
 
             if (opts.dumpScripts)
                 Debug.Log($"Dumped {translatedLines} lines");
@@ -899,6 +1009,8 @@ namespace TranslationExtract
             public bool dumpYotogis;
             public bool dumpTrophy;
             public bool dumpSchedule;
+            public bool dumpNPC;
+            public bool dumpGuest;
             public bool skipTranslatedItems;
             public DumpOptions() { }
 
@@ -913,6 +1025,8 @@ namespace TranslationExtract
                 dumpEvents = other.dumpEvents;
                 dumpTrophy = other.dumpTrophy;
                 dumpSchedule = other.dumpSchedule;
+                dumpNPC = other.dumpNPC;
+                dumpGuest = other.dumpGuest;
                 skipTranslatedItems = other.skipTranslatedItems;
             }
         }
