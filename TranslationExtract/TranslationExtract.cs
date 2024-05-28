@@ -166,6 +166,7 @@ namespace TranslationExtract
                         Toggle("Trophy", ref options.dumpTrophy);
                         Toggle("NPC", ref options.dumpNPC);
                         Toggle("Guest Mode", ref options.dumpGuest);
+                        Toggle("Dances", ref options.dumpDance);
                         Toggle(".menu", ref options.dumpItemNames);
 
                         GUILayout.Label("Other");
@@ -846,7 +847,8 @@ namespace TranslationExtract
                             description = parser.GetCellAsString(8, i)
                         },
                         arg => new[] { $"{arg.id}/トロフィー名", $"{arg.id}/説明" },
-                        arg => new[] { arg.name, arg.description });
+                        arg => new[] { arg.name, arg.description },
+                        opts.skipTranslatedItems);
         }
 
         private void DumpNPC(DumpOptions opts)
@@ -871,7 +873,8 @@ namespace TranslationExtract
                             description = parser.GetCellAsString(6, i)
                         },
                         arg => new[] { $"{arg.id}/苗字", $"{arg.id}/名前", $"{arg.id}/説明" },
-                        arg => new[] { arg.name, arg.name, arg.description });
+                        arg => new[] { arg.name, arg.name, arg.description },
+                        opts.skipTranslatedItems);
 
 
 
@@ -888,10 +891,11 @@ namespace TranslationExtract
                             stat_stype = parser.GetCellAsString(12, i)
                         },
                         arg => new[] { $"{arg.name}/性格", $"{arg.name}/状態" },
-                        arg => new[] { arg.char_type, arg.stat_stype });
+                        arg => new[] { arg.char_type, arg.stat_stype },
+                        opts.skipTranslatedItems);
         }
 
-        private void DumpGuest(DumpOptions dumpOptions)
+        private void DumpGuest(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
             var unitPath = Path.Combine(i2Path, "zzz_guest_mode");
@@ -914,7 +918,8 @@ namespace TranslationExtract
                             prefered_play = parser.GetCellAsString(5, i)
                         },
                         arg => new[] { $"男名/{arg.name}", $"男プロフ/{arg.name}", $"男好プレイ/{arg.name}" },
-                        arg => new[] { arg.displayedName, arg.profile, arg.prefered_play });
+                        arg => new[] { arg.displayedName, arg.profile, arg.prefered_play },
+                        opts.skipTranslatedItems);
 
             sw.Dispose();
 
@@ -929,7 +934,8 @@ namespace TranslationExtract
                             roomDescription = parser.GetCellAsString(7, i)
                         },
                         arg => new[] { $"部屋名/{arg.roomDisplayedName}", $"部屋説明/{arg.roomDisplayedName}" },
-                        arg => new[] { arg.roomDisplayedName, arg.roomDescription });
+                        arg => new[] { arg.roomDisplayedName, arg.roomDescription },
+                        opts.skipTranslatedItems);
 
             //guest mode Scenarios
             sw2.WriteLine("----------------SCENARIOS----------------,,,,");
@@ -941,7 +947,8 @@ namespace TranslationExtract
                             scenarioDescription = parser.GetCellAsString(4, i)
                         },
                         arg => new[] { $"プレイタイトル/{arg.id}", $"プレイ内容/{arg.id}" },
-                        arg => new[] { arg.scenarioTitle, arg.scenarioDescription });
+                        arg => new[] { arg.scenarioTitle, arg.scenarioDescription },
+                        opts.skipTranslatedItems);
 
             //guest mode Scenarios conditions
             sw2.WriteLine("----------------CONDITIONS----------------,,,,");
@@ -956,7 +963,32 @@ namespace TranslationExtract
                 condition6 = parser.GetCellAsString(10, i)
             },
             arg => new[] { $"プレイ条件/{arg.condition1}", $"プレイ条件/{arg.condition2}", $"プレイ条件/{arg.condition3}", $"プレイ条件/{arg.condition4}", $"プレイ条件/{arg.condition5}", $"プレイ条件/{arg.condition6}"},
-            arg => new[] { arg.condition1, arg.condition2, arg.condition3, arg.condition4, arg.condition5, arg.condition6, });
+            arg => new[] { arg.condition1, arg.condition2, arg.condition3, arg.condition4, arg.condition5, arg.condition6, },
+            opts.skipTranslatedItems);
+        }
+
+        private void DumpDance(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_dance");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting Dance data");
+
+            var encoding = new UTF8Encoding(true);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneDanceSelect.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("dance_setting.nei", "SceneDanceSelect",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsInteger(0, i),
+                            danceTitle = parser.GetCellAsString(1, i),
+                            danceDescription = parser.GetCellAsString(6, i)
+                        },
+                        arg => new[] { $"曲名/{arg.id}", $"曲説明/{arg.id}" },
+                        arg => new[] { arg.danceTitle, arg.danceDescription },
+                        opts.skipTranslatedItems);
         }
 
         private string EscapeCSVItem(string str)
@@ -993,7 +1025,7 @@ namespace TranslationExtract
                 DumpSchedule(opts);
                 //Old Method
                 //DumpVIPEvents(opts);
-            }                
+            }
 
             if(opts.dumpTrophy)
                 DumpTrophy(opts);
@@ -1003,6 +1035,9 @@ namespace TranslationExtract
 
             if (options.dumpGuest)
                 DumpGuest(opts);
+
+            if (options.dumpDance)
+                DumpDance(opts);
 
             if (opts.dumpScripts)
                 Debug.Log($"Dumped {translatedLines} lines");
@@ -1035,6 +1070,7 @@ namespace TranslationExtract
             public bool dumpSchedule;
             public bool dumpNPC;
             public bool dumpGuest;
+            public bool dumpDance;
             public bool skipTranslatedItems;
             public DumpOptions() { }
 
@@ -1051,6 +1087,7 @@ namespace TranslationExtract
                 dumpSchedule = other.dumpSchedule;
                 dumpNPC = other.dumpNPC;
                 dumpGuest = other.dumpGuest;
+                dumpDance = other.dumpDance;
                 skipTranslatedItems = other.skipTranslatedItems;
             }
         }
