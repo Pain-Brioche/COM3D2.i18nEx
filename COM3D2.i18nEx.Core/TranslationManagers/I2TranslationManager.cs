@@ -27,9 +27,9 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
 
         private void LoadTranslations()
         {
-            var units = Core.TranslationLoader.GetUITranslationFileNames();
+            var csvFiles = Core.TranslationLoader.GetUITranslationFileNames();
 
-            if (units == null)
+            if (csvFiles == null)
             {
                 Core.Logger.LogInfo("No UI translations found! Skipping...");
                 return;
@@ -39,33 +39,27 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
             source.name = "i18nEx";
             source.ClearAllData();
 
-            foreach (var kv in units.OrderByDescending(k => k.Key, StringComparer.InvariantCultureIgnoreCase))
+            foreach (var csvFilePath in csvFiles.OrderByDescending(k => k, StringComparer.InvariantCultureIgnoreCase))
             {
-                var unit = kv.Key;
-                var tlFiles = kv.Value;
-
                 if (Configuration.I2Translation.VerboseLogging.Value)
-                    Core.Logger.LogInfo($"Loading unit {unit}");
+                    Core.Logger.LogInfo($"Loading unit {csvFilePath}");
 
-                foreach (var tlFile in tlFiles)
+                //Fixes subfoldered files being loaded improperly.
+                var categoryName = Path.GetFileNameWithoutExtension(csvFilePath);//tlFile.Replace("\\", "/").Splice(0, -5);
+
+				if (Configuration.I2Translation.VerboseLogging.Value)
+                    Core.Logger.LogInfo($"Loading category {categoryName}");
+
+                string csvFile;
+                using (var f =
+                    new StreamReader(
+                                     Core.TranslationLoader
+                                         .OpenUiTranslation(csvFilePath)))
                 {
-                    //Fixes subfoldered files being loaded improperly.
-                    var categoryName = Path.GetFileNameWithoutExtension(tlFile);//tlFile.Replace("\\", "/").Splice(0, -5);
-
-					if (Configuration.I2Translation.VerboseLogging.Value)
-                        Core.Logger.LogInfo($"Loading category {categoryName}");
-
-                    string csvFile;
-                    using (var f =
-                        new StreamReader(
-                                         Core.TranslationLoader
-                                             .OpenUiTranslation($"{unit}{Path.DirectorySeparatorChar}{tlFile}")))
-                    {
-                        csvFile = f.ReadToEnd().ToLF();
-                    }
-
-                    source.Import_CSV(categoryName, csvFile, eSpreadsheetUpdateMode.Merge);
+                    csvFile = f.ReadToEnd().ToLF();
                 }
+
+                source.Import_CSV(categoryName, csvFile, eSpreadsheetUpdateMode.Merge);
             }
 
             Core.Logger.LogInfo(

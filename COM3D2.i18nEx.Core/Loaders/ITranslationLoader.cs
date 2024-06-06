@@ -16,7 +16,7 @@ namespace COM3D2.i18nEx.Core.Loaders
 
         IEnumerable<string> GetTextureTranslationFileNames();
 
-        SortedDictionary<string, IEnumerable<string>> GetUITranslationFileNames();
+        IEnumerable<string> GetUITranslationFileNames();
 
         Stream OpenScriptTranslation(string path);
 
