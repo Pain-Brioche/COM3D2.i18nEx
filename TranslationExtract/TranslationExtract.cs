@@ -386,11 +386,10 @@ namespace TranslationExtract
                             subSb.Append(subLine);
                         }
                 }
-                else if (trimmedLine.StartsWith("@SubtitleDisplayForPlayVoice",
-                                                StringComparison.InvariantCultureIgnoreCase))
+                else if (trimmedLine.StartsWith("@SubtitleDisplayForPlayVoice", StringComparison.InvariantCultureIgnoreCase))
                 {
                     captureSubtitlePlay = true;
-                    var sub = ParseTag(trimmedLine.Substring("@SubtitleDisplayForPlayVoice".Length));
+                    var sub = ParseTag(trimmedLine.Substring("Capture".Length));
                     var text = SplitTranslation(sub["text"]);
                     subData = new SubtitleData
                     {
