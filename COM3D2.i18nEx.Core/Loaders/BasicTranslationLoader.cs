@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using COM3D2.i18nEx.Core.Util;
 using ExIni;
 
@@ -43,24 +41,13 @@ namespace COM3D2.i18nEx.Core.Loaders
             return Directory.GetFiles(texPath, "*.png", SearchOption.AllDirectories);
         }
 
-        public SortedDictionary<string, IEnumerable<string>> GetUITranslationFileNames()
+        public IEnumerable<string> GetUITranslationFileNames()
         {
-            var uiPath = Path.Combine(langPath, "UI");
+			var uiPath = Path.Combine(langPath, "UI");
             if (!Directory.Exists(uiPath))
                 return null;
-
-            var dict = new SortedDictionary<string, IEnumerable<string>>(StringComparer.InvariantCultureIgnoreCase);
-
-            foreach (var directory in Directory.GetDirectories(uiPath, "*", SearchOption.TopDirectoryOnly))
-            {
-                var dirName = directory.Splice(uiPath.Length, -1).Trim('\\', '/');
-                dict.Add(dirName,
-                         Directory.GetFiles(directory, "*.csv", SearchOption.AllDirectories)
-                                  .Select(s => s.Splice(directory.Length + 1, -1)));
-            }
-
-            return dict;
-        }
+            return Directory.GetFiles(uiPath, "*.csv", SearchOption.AllDirectories);
+		}
 
         public Stream OpenScriptTranslation(string path)
         {
