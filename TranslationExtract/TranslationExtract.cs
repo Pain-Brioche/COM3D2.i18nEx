@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Logging;
 using I2.Loc;
-using MonoMod.RuntimeDetour.Platforms;
 using UnityEngine;
 
 namespace TranslationExtract

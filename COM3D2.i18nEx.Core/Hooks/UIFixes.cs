@@ -198,8 +198,7 @@ namespace COM3D2.i18nEx.Core.Hooks
                     yield return ins;
         }
 
-        [HarmonyPatch(typeof(UIWFConditionList), nameof(UIWFConditionList.SetTexts),
-                         typeof(KeyValuePair<string[], Color>[]), typeof(int))]
+        [HarmonyPatch(typeof(UIWFConditionList), nameof(UIWFConditionList.SetTexts), typeof(KeyValuePair<string[], Color>[]), typeof(int))]
         [HarmonyTranspiler]
         public static IEnumerable<CodeInstruction> FixSetTexts(IEnumerable<CodeInstruction> instrs)
         {
@@ -241,11 +240,9 @@ namespace COM3D2.i18nEx.Core.Hooks
             }
         }
 
-        [HarmonyPatch(typeof(SkillAcquisitionCondition),
-                         nameof(SkillAcquisitionCondition.CreateConditionTextAndStaturResults))]
+        [HarmonyPatch(typeof(SkillAcquisitionCondition), nameof(SkillAcquisitionCondition.CreateConditionTextAndStaturResults))]
         [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> TranspileCreateConditionTextAndStaturResults(
-            IEnumerable<CodeInstruction> instrs)
+        public static IEnumerable<CodeInstruction> TranspileCreateConditionTextAndStaturResults(IEnumerable<CodeInstruction> instrs)
         {
             var supportMultiLang = AccessTools.PropertyGetter(typeof(Product), nameof(Product.supportMultiLanguage));
             foreach (var ins in instrs)
@@ -307,7 +304,7 @@ namespace COM3D2.i18nEx.Core.Hooks
         // Trophy Small thumbnails fix
         [HarmonyPatch(typeof(TrophyInfo), nameof(TrophyInfo.SetData))]
         [HarmonyPostfix]
-        private static void SupportSubtitle(Trophy.Data trophy_data, ref TrophyInfo __instance)
+        private static void SetData_PostFix(Trophy.Data trophy_data, ref TrophyInfo __instance)
         {
             //Just reuse the JP texture, it's so small that noone is able to ready anything on it anyway.
             if (!string.IsNullOrEmpty(trophy_data.miniCardTextureFileName))
@@ -317,6 +314,7 @@ namespace COM3D2.i18nEx.Core.Hooks
                 __instance.card_sprite_.sprite2D = sprite2D;
             }
         }
+
 
         // Trophy Big pictures fix
         [HarmonyPatch(typeof(SceneTrophyCardFade), nameof(SceneTrophyCardFade.CallCard))]
@@ -374,7 +372,9 @@ namespace COM3D2.i18nEx.Core.Hooks
             }
         }
 
-        //Imperial Villa button fix
+
+        /* //Imperial Villa button fix
+        //Not needed anymore as eng textures are now included in the JP release.        
         //Like the above, the use of the _en suffix breaks the texture
         //And since it's in the middle of the daily scene UI creation, better use a transpiler this time.
         [HarmonyPatch(typeof(DailyCtrl), nameof(DailyCtrl.DisplayViewer))]
@@ -393,6 +393,7 @@ namespace COM3D2.i18nEx.Core.Hooks
 
             return result;
         }
+        */
 
 
         //Guest mode fix
