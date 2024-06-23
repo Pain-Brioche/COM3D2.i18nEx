@@ -516,7 +516,30 @@ namespace TranslationExtract
                             description = parser.GetCellAsString(2, i)
                         },
                         arg => new[] { $"{arg.id}/タイトル", $"{arg.id}/内容" },
-                        arg => new[] { arg.name, arg.description });
+                        arg => new[] { arg.name, arg.description },
+                        opts.skipTranslatedItems);
+
+            sw.Close();
+
+            using var sw2 = new StreamWriter(Path.Combine(unitPath, "SceneScenarioSelect.csv"), true, encoding);
+            sw2.WriteCSV("select_scenario_data.nei", "SceneScenarioSelect",
+                        (parser, i) => new
+                        {
+                            condition = parser.GetCellAsString(22, i),
+                        },
+                        arg =>
+                        {
+                            var conditions = arg.condition.Split('\n');
+
+                            return conditions.Select(c => $"条件文/{c}").ToArray();
+                        },
+                        arg =>
+                        {
+                            var conditions = arg.condition.Split('\n');
+
+                            return conditions;
+                        },
+                        opts.skipTranslatedItems);
         }
 
         private void DumpSchedule(DumpOptions opts)
