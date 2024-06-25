@@ -542,6 +542,39 @@ namespace TranslationExtract
                         opts.skipTranslatedItems);
         }
 
+        private void DumpHoneyMoonEvents(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_honeymoon_events");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting Honeymoon event data");
+
+            var encoding = new UTF8Encoding(true);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneHoneymoonMode.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("honeymoonmode_event_list.nei", "SceneHoneymoonMode",
+                        (parser, i) => new
+                        {
+                            locationName = parser.GetCellAsString(1, i)
+                        },
+                        arg => new[] { $"場所名/{arg.locationName}" },
+                        arg => new[] { arg.locationName },
+                        opts.skipTranslatedItems);
+
+            sw.WriteCSV("honeymoonmode_event_list.nei", "SceneHoneymoonMode",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsString(0, i),
+                            eventName = parser.GetCellAsString(4, i)
+                        },
+                        arg => new[] { $"イベント名/{arg.id}" },
+                        arg => new[] { arg.eventName },
+                        opts.skipTranslatedItems);
+
+        }
+
         private void DumpSchedule(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
@@ -1039,16 +1072,18 @@ namespace TranslationExtract
                 DumpYotogiData(opts);
 
             if (opts.dumpEvents)
+            {
                 DumpScenarioEvents(opts);
+                DumpHoneyMoonEvents(opts);
+            }                
 
             if (opts.dumpVIPEvents)
             {
                 DumpSchedule(opts);
-                //Old Method
-                //DumpVIPEvents(opts);
+                //DumpVIPEvents(opts); //Old Method
             }
 
-            if(opts.dumpTrophy)
+            if (opts.dumpTrophy)
                 DumpTrophy(opts);
 
             if (options.dumpNPC)
