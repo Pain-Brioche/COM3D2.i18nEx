@@ -575,6 +575,56 @@ namespace TranslationExtract
 
         }
 
+        private void DumpPrivateModeEvents(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_privatemode_events");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting Private mode event data");
+
+            var encoding = new UTF8Encoding(true);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "ScenePrivate.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("private_maidmode_eventinformation_list.nei", "ScenePrivate",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsInteger(0, i),
+                            eventName = parser.GetCellAsString(1, i)
+                        },
+                        arg => new[] { $"イベントタイトル/{arg.id}" },
+                        arg => new[] { arg.eventName },
+                        opts.skipTranslatedItems);
+
+            sw.WriteCSV("honeymoonmode_event_list.nei", "ScenePrivate",
+                        (parser, i) => new
+                        {
+                            eventCondition = parser.GetCellAsString(2, i)
+                        },
+                        arg => new[] { $"イベントテキスト/{arg.eventCondition}" },
+                        arg => new[] { arg.eventCondition },
+                        opts.skipTranslatedItems);
+
+            sw.WriteCSV("private_maidmode_location_list.nei", "ScenePrivate",
+                        (parser, i) => new
+                        {
+                            eventLocation = parser.GetCellAsString(1, i)
+                        },
+                        arg => new[] { $"ロケーション名/{arg.eventLocation}" },
+                        arg => new[] { arg.eventLocation },
+                        opts.skipTranslatedItems);
+
+            sw.WriteCSV("private_maidmode_group_list.nei", "ScenePrivate",
+                        (parser, i) => new
+                        {
+                            eventBackgroung = parser.GetCellAsString(1, i)
+                        },
+                        arg => new[] { $"背景/{arg.eventBackgroung}" },
+                        arg => new[] { arg.eventBackgroung },
+                        opts.skipTranslatedItems);
+        }
+
         private void DumpSchedule(DumpOptions opts)
         {
             var i2Path = Path.Combine(TL_DIR, "UI");
@@ -1075,7 +1125,8 @@ namespace TranslationExtract
             {
                 DumpScenarioEvents(opts);
                 DumpHoneyMoonEvents(opts);
-            }                
+                DumpPrivateModeEvents(opts);
+            }
 
             if (opts.dumpVIPEvents)
             {
