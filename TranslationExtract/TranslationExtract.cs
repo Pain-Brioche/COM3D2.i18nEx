@@ -597,7 +597,7 @@ namespace TranslationExtract
                         arg => new[] { arg.eventName },
                         opts.skipTranslatedItems);
 
-            sw.WriteCSV("honeymoonmode_event_list.nei", "ScenePrivate",
+            sw.WriteCSV("private_maidmode_eventinformation_list.nei", "ScenePrivate",
                         (parser, i) => new
                         {
                             eventCondition = parser.GetCellAsString(2, i)
@@ -606,10 +606,10 @@ namespace TranslationExtract
                         arg => new[] { arg.eventCondition },
                         opts.skipTranslatedItems);
 
-            sw.WriteCSV("private_maidmode_location_list.nei", "ScenePrivate",
+            sw.WriteCSV("private_maidmode_group_list.nei", "ScenePrivate",
                         (parser, i) => new
                         {
-                            eventLocation = parser.GetCellAsString(1, i)
+                            eventLocation = parser.GetCellAsString(2, i)
                         },
                         arg => new[] { $"ロケーション名/{arg.eventLocation}" },
                         arg => new[] { arg.eventLocation },
