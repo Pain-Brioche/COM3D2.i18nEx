@@ -99,7 +99,7 @@ namespace TranslationExtract
     {
         public const string TL_DIR = "COM3D2_Localisation";
         private const int WIDTH = 200;
-        private const int HEIGHT = 450;
+        private const int HEIGHT = 500;
         private const int MARGIN_X = 5;
         private const int MARGIN_TOP = 20;
         private const int MARGIN_BOTTOM = 5;
@@ -166,6 +166,7 @@ namespace TranslationExtract
                         Toggle("NPC", ref options.dumpNPC);
                         Toggle("Guest Mode", ref options.dumpGuest);
                         Toggle("Dances", ref options.dumpDance);
+                        Toggle("Mansion", ref options.dumpMansion);
                         Toggle(".menu", ref options.dumpItemNames);
 
                         GUILayout.Label("Other");
@@ -1095,6 +1096,31 @@ namespace TranslationExtract
                         opts.skipTranslatedItems);
         }
 
+        private void DumpMansion(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_mansion_dlc");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting mansion mode data");
+
+            var encoding = new UTF8Encoding(true);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneTeikokusou.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+            sw.WriteCSV("teikokusoumode_playmode_list.nei", "SceneTeikokusou",
+                        (parser, i) => new
+                        {
+                            id = parser.GetCellAsInteger(0, i),
+                            roomName = parser.GetCellAsString(1, i),
+                            guestName = parser.GetCellAsString(2, i),
+                            roomDescription = parser.GetCellAsString(9, i)
+                        },
+                        arg => new[] { $"部屋名/{arg.id}", $"部屋ゲスト名/{arg.id}", $"部屋プロフィールコメント/{arg.id}" },
+                        arg => new[] { arg.roomName, arg.guestName, arg.roomDescription },
+                        opts.skipTranslatedItems);
+        }
+
         private string EscapeCSVItem(string str)
         {
             if (str.Contains("\n") || str.Contains("\"") || str.Contains(","))
@@ -1146,6 +1172,9 @@ namespace TranslationExtract
             if (options.dumpDance)
                 DumpDance(opts);
 
+            if (options.dumpMansion) 
+                DumpMansion(opts);
+
             if (opts.dumpScripts)
                 Debug.Log($"Dumped {translatedLines} lines");
             Debug.Log($"Done! Dumped translations are located in {TL_DIR}. You can now close the game!");
@@ -1178,6 +1207,7 @@ namespace TranslationExtract
             public bool dumpNPC;
             public bool dumpGuest;
             public bool dumpDance;
+            public bool dumpMansion;
             public bool skipTranslatedItems;
             public DumpOptions() { }
 
@@ -1195,6 +1225,7 @@ namespace TranslationExtract
                 dumpNPC = other.dumpNPC;
                 dumpGuest = other.dumpGuest;
                 dumpDance = other.dumpDance;
+                dumpMansion = other.dumpMansion;
                 skipTranslatedItems = other.skipTranslatedItems;
             }
         }
