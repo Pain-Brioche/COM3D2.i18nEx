@@ -419,5 +419,45 @@ namespace COM3D2.i18nEx.Core.Hooks
                 }
             }
         }
+
+
+
+        //Tutorial gear menu fix
+        //Enable the "?" button in the gear menu
+        [HarmonyPatch(typeof(uGUITutorialPanel), nameof(uGUITutorialPanel.IsExistTutorial))]
+        [HarmonyTranspiler]
+        public static IEnumerable<CodeInstruction> IsExistTutorial_Edit(IEnumerable<CodeInstruction> instructions)
+        {
+            var checkpoint = new CodeMatcher(instructions)
+                                 .MatchForward(false,
+                                 new CodeMatch(OpCodes.Ldstr, "tutorial_list")); //easy to match point
+
+
+            var result = checkpoint.Advance(1)
+                                   .RemoveInstructions(7)
+                                   .InstructionEnumeration();
+
+            return result;
+        }
+
+
+
+        //This tells the game to always load the JP tutorial menu (ENG tutorial files are not available by default on a JP game)
+        [HarmonyPatch(typeof(uGUITutorialPanel), nameof(uGUITutorialPanel.ReadCSV))]
+        [HarmonyTranspiler]
+        public static IEnumerable<CodeInstruction> ReadCSV_Edit(IEnumerable<CodeInstruction> instructions)
+        {
+            var checkpoint = new CodeMatcher(instructions)
+                                 .MatchForward(false,
+                                 new CodeMatch(OpCodes.Ldstr, "tutorial_list.nei")); //easy to match point
+
+            var result = checkpoint.Start()
+                                   .Insert(new CodeInstruction(OpCodes.Ldstr, "tutorial_list.nei"))
+                                   .Advance(1)
+                                   .RemoveInstructions(8)
+                                   .InstructionEnumeration();
+
+            return result;
+        }
     }
 }
