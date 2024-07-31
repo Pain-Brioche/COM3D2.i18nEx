@@ -1121,6 +1121,84 @@ namespace TranslationExtract
                         opts.skipTranslatedItems);
         }
 
+        private void DumpMemory(DumpOptions opts)
+        {
+            var i2Path = Path.Combine(TL_DIR, "UI");
+            var unitPath = Path.Combine(i2Path, "zzz_memory");
+            Directory.CreateDirectory(unitPath);
+
+            Debug.Log("Getting Memory data");
+
+            var encoding = new UTF8Encoding(true);
+            using var sw = new StreamWriter(Path.Combine(unitPath, "SceneFreeModeSelect.csv"), false, encoding);
+
+            sw.WriteLine("Key,Type,Desc,Japanese,English");
+
+            //Story
+            sw.WriteCSV("recollection_story.nei", "SceneFreeModeSelect",
+                        (parser, i) => new
+                        {
+                            storyTitle = parser.GetCellAsString(1, i),
+                            storyDescription = parser.GetCellAsString (5, i),
+                        },
+                        arg => new[] { $"タイトル/{arg.storyTitle}", $"説明/{arg.storyTitle}" },
+                        arg => new[] { arg.storyTitle, arg.storyDescription },
+                        opts.skipTranslatedItems);
+
+            //Daily Events
+            sw.WriteCSV("recollection_normal2.nei", "SceneFreeModeSelect",
+                        (parser, i) => new
+                        {
+                            eventTitle = parser.GetCellAsString(1, i),
+                            eventDescription = parser.GetCellAsString(5, i),
+                        },
+                        arg => new[] { $"タイトル/{arg.eventTitle}", $"説明/{arg.eventTitle}" },
+                        arg => new[] { arg.eventTitle, arg.eventDescription },
+                        opts.skipTranslatedItems);
+
+            //Requirements
+            sw.WriteCSV("recollection_story.nei", "SceneFreeModeSelect",
+                       (parser, i) => new
+                       {
+                           storyConditions = parser.GetCellAsString(6, i)
+                       },
+                       arg => new[] { $"条件文/{arg.storyConditions}" },
+                       arg => new[] { arg.storyConditions },
+                       opts.skipTranslatedItems);
+
+            sw.WriteCSV("recollection_normal2.nei", "SceneFreeModeSelect",
+                       (parser, i) => new
+                       {
+                           eventConditions = parser.GetCellAsString(6, i)
+                       },
+                       arg => new[] { $"条件文/{arg.eventConditions}" },
+                       arg => new[] { arg.eventConditions },
+                       opts.skipTranslatedItems);
+
+            //Empire Life Mode
+            sw.WriteCSV("recollection_life_mode.nei", "SceneFreeModeSelect",
+                       (parser, i) => new
+                       {
+                           lifeTitle = parser.GetCellAsString(2, i),
+                           lifeDescription = parser.GetCellAsString(4, i)
+                       },
+                       arg => new[] { $"タイトル/{arg.lifeTitle}", $"説明/{arg.lifeDescription}" },
+                       arg => new[] { arg.lifeTitle, arg.lifeDescription },
+                       opts.skipTranslatedItems);
+
+
+            sw.WriteCSV("recollection_life_mode.nei", "SceneFreeModeSelect",
+                       (parser, i) => new
+                       {
+                           lifeConditions1 = parser.GetCellAsString(5, i),
+                           lifeConditions2 = parser.GetCellAsString(6, i),
+                           lifeConditions3 = parser.GetCellAsString(7, i),
+                       },
+                       arg => new[] { $"条件文/{arg.lifeConditions1}", $"条件文/{arg.lifeConditions2}", $"条件文/{arg.lifeConditions3}" },
+                       arg => new[] { arg.lifeConditions1, arg.lifeConditions2, arg.lifeConditions3 },
+                       opts.skipTranslatedItems);
+        }
+
         private string EscapeCSVItem(string str)
         {
             if (str.Contains("\n") || str.Contains("\"") || str.Contains(","))
@@ -1152,6 +1230,7 @@ namespace TranslationExtract
                 DumpScenarioEvents(opts);
                 DumpHoneyMoonEvents(opts);
                 DumpPrivateModeEvents(opts);
+                DumpMemory(opts);
             }
 
             if (opts.dumpVIPEvents)
