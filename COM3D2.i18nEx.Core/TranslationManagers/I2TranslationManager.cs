@@ -59,7 +59,7 @@ namespace COM3D2.i18nEx.Core.TranslationManagers
                     csvFile = f.ReadToEnd().ToLF();
                 }
 
-                source.Import_CSV(categoryName, csvFile, eSpreadsheetUpdateMode.Merge);
+                source.Import_CSV(categoryName, csvFile, eSpreadsheetUpdateMode.AddNewTerms);
             }
 
             Core.Logger.LogInfo(
