@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using COM3D2.i18nEx.Core.Util;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;

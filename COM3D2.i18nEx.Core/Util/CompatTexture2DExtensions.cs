@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using UnityEngine;
 
-namespace COM3D2.i18nEx.Core
+namespace COM3D2.i18nEx.Core.Util
 {
     static class CompatTexture2DExtensions
     {
@@ -18,7 +18,7 @@ namespace COM3D2.i18nEx.Core
 
             if (Texture2DLoadImage == null)
             {
-               var imageConversionModule = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "UnityEngine.ImageConversionModule");
+                var imageConversionModule = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => a.GetName().Name == "UnityEngine.ImageConversionModule");
                 if (imageConversionModule == null)
                 {
                     throw new Exception("Cannot find UnityEngine.ImageConversionModule assembly");
