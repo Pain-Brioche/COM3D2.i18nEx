@@ -15,7 +15,7 @@ namespace COM3D2.i18nEx.Core.Hooks
         private static string tlSeparator;
 
         private static string TlSeparator =>
-            tlSeparator ??= LocalizationManager.ScriptTranslationMark
+            tlSeparator ??= CompatLocalizationManager.ScriptTranslationMark
                                                .FirstOrDefault(kv => kv.Value == Product.subTitleScenarioLanguage).Key;
 
         public static void Initialize()
