@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using COM3D2.i18nEx.Core.Util;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -128,8 +129,8 @@ namespace COM3D2.i18nEx.Core.Hooks
 
             if (tex is Texture2D tex2d)
             {
-                tex2d.LoadImage(EmptyBytes);
-                tex2d.LoadImage(newData);
+                tex2d.LoadImageCompat(EmptyBytes);
+                tex2d.LoadImageCompat(newData);
                 tex2d.name = $"i18n_{tex2d}";
             }
             else
@@ -169,8 +170,8 @@ namespace COM3D2.i18nEx.Core.Hooks
 
             if (tex is Texture2D tex2d)
             {
-                tex2d.LoadImage(EmptyBytes);
-                tex2d.LoadImage(newData);
+                tex2d.LoadImageCompat(EmptyBytes);
+                tex2d.LoadImageCompat(newData);
                 tex2d.name = $"i18n_{tex2d}";
             }
             else
@@ -207,8 +208,8 @@ namespace COM3D2.i18nEx.Core.Hooks
             if (Configuration.TextureReplacement.VerboseLogging.Value)
                 Core.Logger.LogInfo($"Replacing {value?.texture?.name}");
 
-            value.texture.LoadImage(EmptyBytes);
-            value.texture.LoadImage(newData);
+            value.texture.LoadImageCompat(EmptyBytes);
+            value.texture.LoadImageCompat(newData);
             value.texture.name = $"i18n_{value.texture.name}";
         }
 
