@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>148f3cc2-cfe2-4d17-9555-bd828344fffe</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>i18nEx.Core</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hooks\ScriptTranslationHooks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hooks\TextureReplaceHooks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hooks\TranslationHooks.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Hooks\UIFixes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ILogger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Loaders\BasicTranslationLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Loaders\ITranslationLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Paths.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TranslationManagers\I2TranslationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TranslationManagers\ScriptTranslationManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TranslationManagers\TextureReplaceManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TranslationManagers\TranslationManagerBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\ConfigWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\EnumConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\I2TranslationDump.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\KeyCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\StringExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Utility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\XUATInterop.cs" />
+  </ItemGroup>
+</Project>

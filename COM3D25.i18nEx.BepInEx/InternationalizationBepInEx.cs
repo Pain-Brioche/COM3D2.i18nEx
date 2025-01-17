@@ -4,7 +4,7 @@ using ILogger = COM3D2.i18nEx.Core.ILogger;
 
 namespace COM3D2.i18nEx.BepInEx
 {
-    [BepInPlugin("horse.coder.com3d2.i18nex", "i18nEx", "2.0")]
+    [BepInPlugin("horse.coder.com3d2.i18nex", "i18nEx", "3.0")]
     [BepInDependency("gravydevsupreme.xunity.autotranslator", BepInDependency.DependencyFlags.SoftDependency)]
     public class InternationalizationBepInEx : BaseUnityPlugin, ILogger
     {
@@ -13,7 +13,7 @@ namespace COM3D2.i18nEx.BepInEx
         public void Awake()
         {
             DontDestroyOnLoad(this);
-
+             
             managerObject = new GameObject("i18nExManager");
             DontDestroyOnLoad(managerObject);
 

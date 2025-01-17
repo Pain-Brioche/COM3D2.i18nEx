@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D2.i18nEx.Core", "COM3D2.i18nEx.Core\COM3D2.i18nEx.Core.csproj", "{1009E384-FACF-468A-8C86-E955C3F8E61C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D25.i18nEx.Core", "COM3D25.i18nEx.Core\COM3D25.i18nEx.Core.csproj", "{1009E384-FACF-468A-8C86-E955C3F8E61C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D2.i18nEx.BepInEx", "COM3D2.i18nEx.BepInEx\COM3D2.i18nEx.BepInEx.csproj", "{818B9F24-8EBF-444B-A7DE-E7786E34698B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D25.i18nEx.BepInEx", "COM3D25.i18nEx.BepInEx\COM3D25.i18nEx.BepInEx.csproj", "{818B9F24-8EBF-444B-A7DE-E7786E34698B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranslationExtract", "TranslationExtract\TranslationExtract.csproj", "{CC1CBEEC-828E-4231-8A5C-15A3B3155ABF}"
 EndProject
@@ -13,6 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "i18nEx.Core", "i18nEx.Core\i18nEx.Core.shproj", "{148F3CC2-CFE2-4D17-9555-BD828344FFFE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D2.i18nEx.BepinEx", "COM3D2.i18nEx.BepinEx\COM3D2.i18nEx.BepinEx.csproj", "{9B40B27A-5A55-4AD5-9648-EFFFD5F7C6B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D2.i18nEx.Core", "COM3D2.i18nEx.Core\COM3D2.i18nEx.Core.csproj", "{646E231B-D346-439B-82C0-D5F38DD41237}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,11 +38,24 @@ Global
 		{CC1CBEEC-828E-4231-8A5C-15A3B3155ABF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC1CBEEC-828E-4231-8A5C-15A3B3155ABF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC1CBEEC-828E-4231-8A5C-15A3B3155ABF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B40B27A-5A55-4AD5-9648-EFFFD5F7C6B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B40B27A-5A55-4AD5-9648-EFFFD5F7C6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B40B27A-5A55-4AD5-9648-EFFFD5F7C6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B40B27A-5A55-4AD5-9648-EFFFD5F7C6B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{646E231B-D346-439B-82C0-D5F38DD41237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{646E231B-D346-439B-82C0-D5F38DD41237}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{646E231B-D346-439B-82C0-D5F38DD41237}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{646E231B-D346-439B-82C0-D5F38DD41237}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E1355369-B6DF-4567-A478-99D522FCEB4A}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		i18nEx.Core\i18nEx.Core.projitems*{1009e384-facf-468a-8c86-e955c3f8e61c}*SharedItemsImports = 5
+		i18nEx.Core\i18nEx.Core.projitems*{148f3cc2-cfe2-4d17-9555-bd828344fffe}*SharedItemsImports = 13
+		i18nEx.Core\i18nEx.Core.projitems*{646e231b-d346-439b-82c0-d5f38dd41237}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
